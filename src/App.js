@@ -1,56 +1,47 @@
-import { useEffect, useMemo, useState } from 'react';
-import Number from './Number';
+import { useEffect, useState } from 'react';
 import './App.css';
 
 function App() {
   const [number, setNumber] = useState(0);
-  const [inRange, setInRange] = useState(true);
+  const [isActive, setIsActive] = useState(false);
 
-  // useEffect( () => {
-  //   checkRange();
-  // }, [number])
-
-  const checkRange = () => {
-    if (number !== 0 || number > 1000){
-      if (!inRange) {
-        alert('bummer')
-      } else {
-        alert('winner')
+/*listens for change in 'number' and delays
+alert window until final 'number' from spinNumbers()
+is returned */
+  useEffect( () => {
+    let timer = setTimeout( () => {
+      if (number > 1000){
+        alert("Too bad! You've lost!");
+        setNumber(0);
+        setIsActive(false);
       }
-    }
-  }
+    }, 250)
+    return () => clearTimeout(timer);
+    }, [number]);
 
-  // const number = useMemo( () => {
-  //   const value = number;
-  //   return value;
-  // }, [number]);
-
-  // useEffect( () => {
-  //     // if ( number > 1000) {
-  //     //   setInRange(false);
-  //     //   checkRange();
-  //     // }
-
-
-  // }, [ number, inRange ]);
-
-  // useEffect(() => {
-  //   if (!inRange) {
-  //     alert('you lose');
-  //     setInRange(true);
-  //     setNumber(0);
-  //   }
-  // }, [inRange])
 
   const getRandomNumber = (max, min) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  const handleClick = () => {
+  const getNumbersArray = () => {
+    let numberArr = [];
+    let i = 0;
+    while(i < 50) {
+      const number = getRandomNumber(1, 100000);
+      numberArr.push(number);
+      i++;
+    }
+    return numberArr;
+  }
+
+/*Iterates over a lot of arrays and sets 'number' a bunch
+ to give illusion of spinning numbers*/
+  const spinNumbers = () => {
     let i = 0;
     let timer;
     while( i < 400){
-      const spinningNumbers = getNumbers();
+      let spinningNumbers = getNumbersArray();
       for ( let i = 0; i < spinningNumbers.length; i++){
         timer = setTimeout(() => setNumber(spinningNumbers[i]), 10);
       }
@@ -59,28 +50,29 @@ function App() {
     return () => clearTimeout(timer);
   }
 
-  const getNumbers = () => {
-    let numberArr = [];
-    let i = 0;
-    while(i < 50) {
-      const number = getRandomNumber(1, 75000);
-      numberArr.push(number);
-      i++;
-    }
-    return numberArr;
+// Changes button color, builds anticipation with setTimeout
+  const handleClick = () => {
+     setIsActive(true);
+     let timer = setTimeout(() => spinNumbers(), 300);
+     return () => clearTimeout(timer);
   }
-
-
-  console.log(number);
-  // console.log(data);
 
     return (
       <div className="App">
         <h1>The JavaScript Lottery</h1>
         <h2>Click the button to draw a number</h2>
-        <button onClick={handleClick}>Let's Play</button> 
+        <button 
+          style={{
+            fontSize: "18px",
+            backgroundColor: isActive ? "#61dafb" : "#D3D3D3",
+            border: isActive ? "solid 2px #86C5D8" : "solid 2px #899499",
+            width: "200px",
+            height: "100px",
+          }} 
+          onClick={handleClick}
+        >Let's Play
+        </button> 
         <h3>Your Number: {number}</h3>
-        {/* <Number number={number} inRange={inRange}/> */}
         <p>* Any number in the 1 to 1000 range wins!</p>
       </div>
     );
